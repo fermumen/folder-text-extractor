@@ -66,7 +66,7 @@ function App() {
     '.pnp',
     '.yarn-integrity'
   ];
-  
+
   const processFileEntry = async (entry: FileSystemEntry, path: string = ''): Promise<FileEntry | null> => {
     // Skip ignored directories
     if (entry.isDirectory && directoriesToIgnore.includes(entry.name)) {
@@ -80,7 +80,7 @@ function App() {
           let content = '';
           const isTextFile = file.type.startsWith('text/') || [
             '.txt', '.md', '.js', '.jsx', '.ts', '.tsx', '.css', '.scss', '.less', 
-            '.html', '.htm', '.json', '.yaml', '.yml', '.xml', '.ps1', '.py', 
+            '.html', '.htm', '.json', '.yaml', '.yml', '.xml', '.ps1', '.py', '.ipynb',
             '.r', '.java', '.kt', '.scala', '.go', '.rs', '.php', '.rb', '.pl', '.sh', 
             '.bash', '.zsh', '.fish', '.lua', '.sql', '.swift', '.m', '.h', '.c', '.cpp', 
             '.hpp', '.cc', '.hh', '.cs', '.fs', '.vb', '.dart', '.elm', '.clj', '.cljs', 
