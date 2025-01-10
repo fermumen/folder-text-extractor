@@ -23,8 +23,19 @@ function App() {
       return new Promise((resolve) => {
         fileEntry.file(async (file) => {
           let content = '';
-          const isTextFile = file.type.startsWith('text/') || file.name.match(/\.(txt|md|js|jsx|ts|tsx|css|html|json|yaml|yml|xml|csv)$/i);
-          
+          const isTextFile = file.type.startsWith('text/') || [
+            '.txt', '.md', '.js', '.jsx', '.ts', '.tsx', '.css', '.scss', '.less', 
+            '.html', '.htm', '.json', '.yaml', '.yml', '.xml', '.csv', '.ps1', '.py', 
+            '.r', '.java', '.kt', '.scala', '.go', '.rs', '.php', '.rb', '.pl', '.sh', 
+            '.bash', '.zsh', '.fish', '.lua', '.sql', '.swift', '.m', '.h', '.c', '.cpp', 
+            '.hpp', '.cc', '.hh', '.cs', '.fs', '.vb', '.dart', '.elm', '.clj', '.cljs', 
+            '.edn', '.ex', '.exs', '.erl', '.hrl', '.ml', '.mli', '.fsi', '.fsx', '.v', 
+            '.sv', '.vhd', '.vhdl', '.tex', '.sty', '.cls', '.rd', '.rs', '.rlib', 
+            '.toml', '.ini', '.cfg', '.conf', '.env', '.dockerfile', '.gitignore', 
+            '.gitattributes', '.editorconfig', '.npmrc', '.yarnrc', '.babelrc', 
+            '.eslintrc', '.prettierrc', '.stylelintrc', '.htaccess', '.nginx', 
+            '.apache', '.log', '.diff', '.patch'
+          ].some(ext => file.name.toLowerCase().endsWith(ext));
           if (isTextFile && file.size < maxFileSize * 1024 * 1024) {
             content = await file.text();
           } else if (isTextFile) {
