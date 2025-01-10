@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { FolderTree, FileText } from 'lucide-react';
+import { FolderTree, FileText, Copy } from 'lucide-react'; // Added Copy icon
 
 interface FileEntry {
   name: string;
@@ -16,6 +16,7 @@ function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [maxFileSize, setMaxFileSize] = useState<number>(1); // Size in MB
   const [showSizeWarning, setShowSizeWarning] = useState(false);
+  const [showCopiedMessage, setShowCopiedMessage] = useState(false); // Added for copy feedback
 
   const directoriesToIgnore = [
     '.git',
@@ -221,6 +222,18 @@ function App() {
     URL.revokeObjectURL(url);
   }, [combinedText]);
 
+  // Added copyTextToClipboard function
+  const copyTextToClipboard = useCallback(() => {
+    if (!combinedText) return;
+
+    navigator.clipboard.writeText(combinedText).then(() => {
+      setShowCopiedMessage(true); // Show feedback
+      setTimeout(() => setShowCopiedMessage(false), 2000); // Hide feedback after 2 seconds
+    }).catch((error) => {
+      console.error('Failed to copy text:', error);
+    });
+  }, [combinedText]);
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
@@ -283,16 +296,33 @@ function App() {
               <h2 className="text-xl font-semibold text-gray-800">
                 Combined Text Output
               </h2>
-              <button
-                onClick={downloadText}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-              >
-                Download
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={downloadText}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                >
+                  Download
+                </button>
+                <button
+                  onClick={copyTextToClipboard}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors flex items-center gap-2"
+                  title="Copy to Clipboard"
+                >
+                  <Copy className="w-5 h-5" />
+                  <span>Copy</span>
+                </button>
+              </div>
             </div>
             <pre className="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap">
               {combinedText}
             </pre>
+          </div>
+        )}
+
+        {/* Added feedback message for copying */}
+        {showCopiedMessage && (
+          <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
+            Copied to clipboard!
           </div>
         )}
       </div>
