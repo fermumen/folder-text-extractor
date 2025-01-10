@@ -17,7 +17,62 @@ function App() {
   const [maxFileSize, setMaxFileSize] = useState<number>(1); // Size in MB
   const [showSizeWarning, setShowSizeWarning] = useState(false);
 
-  const processFileEntry = async (entry: FileSystemEntry, path: string = ''): Promise<FileEntry> => {
+  const directoriesToIgnore = [
+    '.git',
+    '.svn',
+    '.hg',
+    'node_modules',
+    'vendor',
+    'bower_components',
+    '.venv',
+    'venv',
+    'env',
+    'virtualenv',
+    '__pycache__',
+    'target',
+    'dist',
+    'build',
+    'out',
+    '.idea',
+    '.vscode',
+    '.vs',
+    '.env',
+    '.env.local',
+    '.env.development',
+    '.env.production',
+    '.config',
+    '.settings',
+    '.cache',
+    '.tmp',
+    'temp',
+    'tmp',
+    'bin',
+    'obj',
+    'coverage',
+    '.nyc_output',
+    'test-results',
+    'docs',
+    '.github',
+    '.DS_Store',
+    'Thumbs.db',
+    '.terraform',
+    '.serverless',
+    '.next',
+    '.nuxt',
+    '.svelte-kit',
+    '.angular',
+    '.parcel-cache',
+    '.yarn',
+    '.pnp',
+    '.yarn-integrity'
+  ];
+  
+  const processFileEntry = async (entry: FileSystemEntry, path: string = ''): Promise<FileEntry | null> => {
+    // Skip ignored directories
+    if (entry.isDirectory && directoriesToIgnore.includes(entry.name)) {
+      return null; // Skip this directory entirely
+    }
+
     if (entry.isFile) {
       const fileEntry = entry as FileSystemFileEntry;
       return new Promise((resolve) => {
@@ -70,15 +125,23 @@ function App() {
         readEntries();
       });
 
-      const children = await Promise.all(
-        entries.map(entry => processFileEntry(entry, `${path}/${dirEntry.name}`))
+      // Filter out ignored directories before processing their children
+      const filteredEntries = entries.filter(
+        (entry) => !(entry.isDirectory && directoriesToIgnore.includes(entry.name))
       );
+
+      const children = await Promise.all(
+        filteredEntries.map(entry => processFileEntry(entry, `${path}/${dirEntry.name}`))
+      );
+
+      // Filter out null entries (ignored directories)
+      const validChildren = children.filter(child => child !== null) as FileEntry[];
 
       return {
         name: entry.name,
         path: `${path}/${entry.name}`,
         isDirectory: true,
-        children
+        children: validChildren
       };
     }
   };
@@ -125,11 +188,13 @@ function App() {
     if (!entry) return;
 
     const structure = await processFileEntry(entry);
-    setFolderStructure(structure);
+    if (structure) {
+      setFolderStructure(structure);
 
-    const treeText = `Folder Structure:\n${generateTreeText(structure)}`;
-    const filesText = generateCombinedText(structure);
-    setCombinedText(`${treeText}\n${filesText}`);
+      const treeText = `Folder Structure:\n${generateTreeText(structure)}`;
+      const filesText = generateCombinedText(structure);
+      setCombinedText(`${treeText}\n${filesText}`);
+    }
   }, [maxFileSize]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
